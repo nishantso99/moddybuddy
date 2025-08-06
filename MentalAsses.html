@@ -1,0 +1,204 @@
+<!-- Full file with emoji-enhanced options for all 6 assessments -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MoodyBuddy - Self Assessment</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 1s ease-in-out forwards;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-pink-100 via-white to-pink-200 min-h-screen text-[#355C4A] font-sans">
+  <main class="min-h-screen p-6 flex flex-col items-center justify-center animate-fadeIn">
+    <h1 class="text-4xl font-bold text-center mb-8">🌿 Mental Health Self-Assessment</h1>
+    <p class="text-center max-w-xl mb-8 text-lg">
+      Select a topic to begin your tailored self-assessment.
+    </p>
+
+    <div class="mb-6 flex flex-wrap justify-center gap-4" id="topicSelector">
+      <button class="bg-white text-[#FF8B94] font-semibold px-4 py-2 rounded shadow hover:bg-[#FF8B94] hover:text-white transition" data-topic="anxiety">😰 Anxiety</button>
+      <button class="bg-white text-[#FF8B94] font-semibold px-4 py-2 rounded shadow hover:bg-[#FF8B94] hover:text-white transition" data-topic="depression">😞 Depression</button>
+      <button class="bg-white text-[#FF8B94] font-semibold px-4 py-2 rounded shadow hover:bg-[#FF8B94] hover:text-white transition" data-topic="eating">🍽️ Eating Issues</button>
+      <button class="bg-white text-[#FF8B94] font-semibold px-4 py-2 rounded shadow hover:bg-[#FF8B94] hover:text-white transition" data-topic="addiction">🌀 Addiction</button>
+      <button class="bg-white text-[#FF8B94] font-semibold px-4 py-2 rounded shadow hover:bg-[#FF8B94] hover:text-white transition" data-topic="relationship">❤️ Relationship</button>
+      <button class="bg-white text-[#FF8B94] font-semibold px-4 py-2 rounded shadow hover:bg-[#FF8B94] hover:text-white transition" data-topic="professional">💼 Professional Stress</button>
+    </div>
+
+    <div id="selectedTopicTitle" class="text-2xl font-semibold mb-4"></div>
+
+    <form id="questionsContainer" class="w-full max-w-2xl space-y-6 mb-6"></form>
+
+    <button id="submitBtn" class="bg-[#FF8B94] text-white px-6 py-3 rounded-full shadow hover:scale-105 transition-transform duration-300 hidden">Submit</button>
+
+    <div id="report" class="w-full max-w-2xl mt-6"></div>
+    <a href="content.html" 
+   class="inline-block px-6 py-3 bg-[#FF8B94]  text-white font-semibold rounded-lg shadow-md hover:bg-[#FF8B94] transition duration-300">
+   Go to Content
+</a>
+
+
+    
+  </main>
+
+  <script>
+    const emojiOptions = ["😄 Not at all", "🙂 Slightly", "😐 Moderately", "😟 Severely", "😭 Extremely"];
+    const yesNoEmoji = ["🙅‍♂️ Never", "😌 Rarely", "😕 Sometimes", "😰 Often", "😱 Always"];
+    const freqEmoji = ["🙅‍♂️ No", "😐 Slightly", "😟 Moderately", "😫 Very", "😩 Extremely"];
+    const relPosEmoji = ["💖 Always", "😊 Often", "😐 Sometimes", "😟 Rarely", "💔 Never"];
+    const revFreqEmoji = ["💔 Never", "😟 Rarely", "😐 Sometimes", "😰 Often", "😱 Always"];
+
+    const topics = {
+      anxiety: {
+        title: "😰 Anxiety Assessment",
+        questions: [
+          { q: "Do you often feel nervous or on edge?", options: yesNoEmoji },
+          { q: "Do you struggle to control worry?", options: yesNoEmoji },
+          { q: "Does anxiety interfere with your daily tasks?", options: emojiOptions },
+          { q: "Do you feel a sense of panic frequently?", options: yesNoEmoji },
+          { q: "Do you experience sudden rapid heartbeats?", options: yesNoEmoji }
+        ]
+      },
+      depression: {
+        title: "😞 Depression Assessment",
+        questions: [
+          { q: "Have you lost interest in activities you used to enjoy?", options: yesNoEmoji },
+          { q: "Do you feel hopeless or helpless frequently?", options: yesNoEmoji },
+          { q: "Are you struggling with low energy or fatigue?", options: freqEmoji },
+          { q: "Do you feel worthless or guilty?", options: yesNoEmoji },
+          { q: "Do you find it hard to concentrate?", options: emojiOptions }
+        ]
+      },
+      eating: {
+        title: "🍽️ Eating Issues Assessment",
+        questions: [
+          { q: "Do you often feel guilty after eating?", options: yesNoEmoji },
+          { q: "Do you skip meals intentionally?", options: ["🙅‍♂️ No", "😐 Occasionally", "😕 Sometimes", "😬 Often", "🚫 Almost always"] },
+          { q: "Are you preoccupied with your body image?", options: emojiOptions },
+          { q: "Do you eat in secret or hide food?", options: yesNoEmoji },
+          { q: "Do you restrict your eating to feel in control?", options: yesNoEmoji }
+        ]
+      },
+      addiction: {
+        title: "🌀 Addiction Assessment",
+        questions: [
+          { q: "Do you find it hard to cut back on a substance or behavior?", options: yesNoEmoji },
+          { q: "Do you continue despite negative consequences?", options: yesNoEmoji },
+          { q: "Have people expressed concern about your usage?", options: yesNoEmoji },
+          { q: "Do you experience cravings or urges?", options: yesNoEmoji },
+          { q: "Has your tolerance increased over time?", options: emojiOptions }
+        ]
+      },
+      relationship: {
+        title: "❤️ Relationship Assessment",
+        questions: [
+          { q: "Do you feel emotionally supported by your partner?", options: relPosEmoji },
+          { q: "Do conflicts escalate easily?", options: revFreqEmoji },
+          { q: "Do you feel heard and respected?", options: relPosEmoji },
+          { q: "Are boundaries respected in your relationship?", options: relPosEmoji },
+          { q: "Do you feel safe and secure with your partner?", options: relPosEmoji }
+        ]
+      },
+      professional: {
+        title: "💼 Professional Stress Assessment",
+        questions: [
+          { q: "Do you feel overwhelmed by your workload?", options: emojiOptions },
+          { q: "Do you struggle with work-life balance?", options: yesNoEmoji },
+          { q: "Do you feel underappreciated at work?", options: yesNoEmoji },
+          { q: "Do you dread going to work?", options: yesNoEmoji },
+          { q: "Do you experience burnout symptoms?", options: emojiOptions }
+        ]
+      }
+    };
+
+    const topicButtons = document.querySelectorAll("button[data-topic]");
+    const questionsContainer = document.getElementById("questionsContainer");
+    const submitBtn = document.getElementById("submitBtn");
+    const reportDiv = document.getElementById("report");
+    const selectedTopicTitle = document.getElementById("selectedTopicTitle");
+    const topicSelector = document.getElementById("topicSelector");
+
+    topicButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const topicKey = button.getAttribute("data-topic");
+        const topic = topics[topicKey];
+
+        if (!topic) return;
+
+        selectedTopicTitle.textContent = topic.title;
+        questionsContainer.innerHTML = "";
+        reportDiv.innerHTML = "";
+        submitBtn.classList.remove("hidden");
+        topicSelector.classList.add("hidden");
+
+        topic.questions.forEach((item, i) => {
+          const div = document.createElement("div");
+          div.innerHTML = `
+            <div>
+              <label class="block font-semibold mb-2">${item.q}</label>
+              <div class="flex gap-4 flex-nowrap overflow-x-auto">
+                ${item.options.map((opt, idx) => `
+                  <label class="cursor-pointer">
+                    <input type="radio" name="q${i}" value="${idx}" class="peer hidden">
+                    <div class="px-5 py-3 rounded-md border text-center min-w-[120px] text-sm peer-checked:bg-[#FF8B94] peer-checked:text-white bg-gray-100 hover:bg-[#ffe2e6] transition">
+                      ${opt}
+                    </div>
+                  </label>
+                `).join('')}
+              </div>
+            </div>
+          `;
+          questionsContainer.appendChild(div);
+        });
+      });
+    });
+
+    submitBtn.addEventListener("click", () => {
+      const responses = questionsContainer.querySelectorAll("input[type='radio']:checked");
+      const totalQuestions = questionsContainer.querySelectorAll("input[type='radio']").length / 5;
+      if (responses.length < totalQuestions) {
+        alert("Please answer all questions before submitting.");
+        return;
+      }
+      let total = 0;
+      responses.forEach(input => total += parseInt(input.value));
+      const avg = total / responses.length;
+
+      let message = "";
+      if (avg < 1) message = "🌟 You're doing great! Keep nurturing your peace.";
+      else if (avg < 2) message = "🌼 Mild signs noticed. Gentle routines might help you feel better.";
+      else if (avg < 3) message = "🌙 You might be facing moderate struggles. Sharing with someone trusted can bring light.";
+      else message = "🛑 High concern. Please reach out to a mental health expert without delay, Or you can visit Resource Page ";
+
+      reportDiv.innerHTML = `<div class="mt-4 p-6 border-2 border-[#FF8B94] bg-white rounded-lg shadow text-lg text-[#FF8B94] font-medium">${message}</div>`;
+    });
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="saveAssessment.js"></script>
+  
+  <script>
+    // Example usage after assessment is completed
+    const resultData = {
+      topic: "Anxiety",
+      moodScore: 2.8,
+      moodCategory: "Neutral 🙂",
+      answers: [
+        { question: "Do you feel nervous?", answer: "Sometimes 😐", weight: 2 },
+        { question: "How often do you worry?", answer: "Often 😟", weight: 3 },
+        // more...
+      ]
+    };
+  
+    mentalAssement(resultData);
+  </script>
+  
+</body>
+</html>

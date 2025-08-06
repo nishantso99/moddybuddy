@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MoodyBuddy Dashboard</title>
+  <!-- Chart.js for Mood Chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+  <!-- jsPDF and html2canvas for PDF Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Tailwind CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+</head>
+
+<body class="bg-gradient-to-br from-[#A8E6CF] to-[#d1f0e4] min-h-screen text-gray-800">
+  <!-- Navbar -->
+  <nav class="bg-white/60 backdrop-blur-md shadow-md p-4 fixed top-0 w-full z-50 flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-pink-500">MoodyBuddy</h1>
+    <p class="text-sm text-gray-600">Your Mental Wellness Partner</p>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="pt-20 px-4 md:px-20 grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- Mood Overview -->
+    <section class="md:col-span-2 space-y-6">
+      <!-- Score Summary -->
+      <div class="bg-white rounded-2xl p-6 shadow-lg hover:scale-[1.02] transition-transform">
+        <h2 class="text-xl font-semibold text-pink-500 mb-2">Assessment Result</h2>
+        <p class="text-gray-700">Your Mood Score: <span id="scoreDisplay" class="font-bold text-lg">--</span></p>
+        <p class="text-gray-700 mt-1">Mood Status: <span id="moodStatus" class="font-bold text-lg">--</span></p>
+        <p class="text-gray-600 mt-2" id="suggestion">We will suggest you something based on your mood.</p>
+      </div>
+
+      <!-- Mood Chart -->
+      <div class="bg-white rounded-2xl p-6 shadow-lg hover:scale-[1.02] transition-transform">
+        <h2 class="text-xl font-semibold text-pink-500 mb-4">Mood Progress Chart</h2>
+        <canvas id="moodChart" height="150"></canvas>
+        <button onclick="downloadPDF()" class="mt-4 bg-pink-400 hover:bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md">Download PDF Report</button>
+      </div>
+    </section>
+
+    <!-- Right Panel - Your Thoughts -->
+    <section class="bg-white rounded-2xl p-6 shadow-lg hover:scale-[1.02] transition-transform h-fit">
+      <h2 class="text-xl font-semibold text-pink-500 mb-4">Your Thoughts</h2>
+      <textarea id="thoughtInput" rows="6" placeholder="Write about yourself..." class="w-full p-3 border rounded-xl focus:ring-2 focus:ring-pink-300 transition-all"></textarea>
+      <button onclick="saveThought()" class="mt-3 bg-pink-400 hover:bg-pink-500 text-white px-4 py-2 rounded-lg shadow-md">Save</button>
+
+      <div class="flex justify-between items-center mt-6">
+        <h3 class="text-lg font-semibold text-pink-400">Saved Entries</h3>
+        <button onclick="toggleSortOrder()" id="sortButton" class="text-sm text-pink-500 hover:text-pink-600">Sort: Newest First</button>
+      </div>
+      <ul id="thoughtList" class="mt-2 space-y-2 list-disc list-inside text-gray-700 max-h-64 overflow-y-auto"></ul>
+    </section>
+  </main>
+
+  <!-- Script Section -->
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWUt0uIHtt9Yg32Q4DTGG5A8V8Kg_5Nh4",
+      authDomain: "mindmate-3be89.firebaseapp.com",
+      projectId: "mindmate-3be89",
+      storageBucket: "mindmate-3be89.appspot.com",
+      messagingSenderId: "728689802243",
+      appId: "1:728689802243:web:6b72843ca23117b120e236",
+      measurementId: "G-QWN4PTX6Y8",
+      databaseURL: "https://mindmate-3be89-default-rtdb.firebaseio.com"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const rtdb = firebase.database();
+
+    // Sort order state
+    let isDescending = true;
+
+    // Fetch Latest Assessment Score
+    db.collection("assessments")
+      .orderBy("timestamp", "desc")
+      .limit(1)
+      .get()
+      .then((querySnapshot) => {
+        if (!querySnapshot.empty) {
+          const data = querySnapshot.docs[0].data();
+          const score = data.moodScore;
+
+          document.getElementById("scoreDisplay").textContent = score;
+          document.getElementById("moodStatus").textContent = getMoodStatus(score);
+          document.getElementById("suggestion").textContent = getSuggestion(score);
+
+          const today = new Date();
+          const label = today.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+          updateMoodChart(score, label);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching latest assessment:", error);
+      });
+
+    // Mood Status Function
+    function getMoodStatus(score) {
+      if (score >= 4) return "Happy 😊";
+      else if (score >= 2.5) return "Neutral 🙂";
+      else return "Low 😢";
+    }
+
+    // Mood Suggestion Function
+    function getSuggestion(score) {
+      if (score >= 4) return "Keep doing what you love and share joy!";
+      else if (score >= 2.5) return "Stay balanced and take time for self-care.";
+      else return "Consider journaling or reaching out to someone you trust.";
+    }
+
+    // Update Mood Chart
+    function updateMoodChart(latestScore, latestLabel) {
+      const data = JSON.parse(localStorage.getItem("moodData")) || [];
+      data.push({ label: latestLabel, score: latestScore });
+
+      if (data.length > 7) data.shift();
+      localStorage.setItem("moodData", JSON.stringify(data));
+
+      const ctx = document.getElementById("moodChart").getContext("2d");
+      new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: data.map(entry => entry.label),
+          datasets: [{
+            label: "Mood Score",
+            data: data.map(entry => entry.score),
+            borderColor: "#FF8B94",
+            backgroundColor: "rgba(255, 139, 148, 0.2)",
+            tension: 0.4
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              suggestedMin: 0,
+              suggestedMax: 5
+            }
+          }
+        }
+      });
+    }
+
+    // Save Thought
+    function saveThought() {
+      const thought = document.getElementById("thoughtInput").value.trim();
+      if (thought) {
+        const today = new Date();
+        const dateKey = today.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        const entry = { text: thought, timestamp: Date.now() };
+
+        rtdb.ref("thoughts/" + dateKey).push(entry, (error) => {
+          if (error) {
+            console.error("Failed to save thought:", error);
+          } else {
+            console.log("Thought saved successfully:", entry);
+            document.getElementById("thoughtInput").value = "";
+          }
+        });
+      } else {
+        console.warn("Empty thought input. Nothing to save.");
+      }
+    }
+
+    // Display Saved Thoughts
+    rtdb.ref("thoughts").on("value", (snapshot) => {
+      const thoughtList = document.getElementById("thoughtList");
+      thoughtList.innerHTML = "";
+
+      // Collect all thoughts with their dates
+      const thoughtsByDate = [];
+      snapshot.forEach((dateSnap) => {
+        const date = dateSnap.key;
+        const thoughts = [];
+        dateSnap.forEach((thoughtSnap) => {
+          thoughts.push({ text: thoughtSnap.val().text, timestamp: thoughtSnap.val().timestamp });
+        });
+        thoughtsByDate.push({ date, thoughts });
+      });
+
+      // Sort thoughts by date
+      thoughtsByDate.sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return isDescending ? dateB - dateA : dateA - dateB;
+      });
+
+      // Display sorted thoughts
+      thoughtsByDate.forEach(({ date, thoughts }) => {
+        if (thoughts.length > 0) {
+          // Sort thoughts within each date by timestamp (newest first)
+          thoughts.sort((a, b) => b.timestamp - a.timestamp);
+          const li = document.createElement("li");
+          li.innerHTML = `<strong>${date}:</strong><ul class="ml-4 list-disc text-sm mt-1">${thoughts
+            .map(t => `<li>${t.text}</li>`)
+            .join("")}</ul>`;
+          thoughtList.appendChild(li);
+        }
+      });
+    });
+
+    // Toggle Sort Order
+    function toggleSortOrder() {
+      isDescending = !isDescending;
+      document.getElementById("sortButton").textContent = isDescending ? "Sort: Newest First" : "Sort: Oldest First";
+      // Trigger re-render by re-fetching thoughts
+      rtdb.ref("thoughts").once("value").then((snapshot) => {
+        const thoughtList = document.getElementById("thoughtList");
+        thoughtList.innerHTML = "";
+
+        const thoughtsByDate = [];
+        snapshot.forEach((dateSnap) => {
+          const date = dateSnap.key;
+          const thoughts = [];
+          dateSnap.forEach((thoughtSnap) => {
+            thoughts.push({ text: thoughtSnap.val().text, timestamp: thoughtSnap.val().timestamp });
+          });
+          thoughtsByDate.push({ date, thoughts });
+        });
+
+        thoughtsByDate.sort((a, b) => {
+          const dateA = new Date(a.date);
+          const dateB = new Date(b.date);
+          return isDescending ? dateB - dateA : dateA - dateB;
+        });
+
+        thoughtsByDate.forEach(({ date, thoughts }) => {
+          if (thoughts.length > 0) {
+            thoughts.sort((a, b) => b.timestamp - a.timestamp);
+            const li = document.createElement("li");
+            li.innerHTML = `<strong>${date}:</strong><ul class="ml-4 list-disc text-sm mt-1">${thoughts
+              .map(t => `<li>${t.text}</li>`)
+              .join("")}</ul>`;
+            thoughtList.appendChild(li);
+          }
+        });
+      });
+    }
+
+    // Download PDF Report
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 10;
+      let yOffset = 10;
+
+      // Title
+      doc.setFontSize(20);
+      doc.setTextColor(0, 0, 0); // Black color
+      doc.text("MoodyBuddy Mental Wellness Report", margin, yOffset);
+      yOffset += 10;
+
+      // Date
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0); // Black color
+      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, margin, yOffset);
+      yOffset += 10;
+
+      // Mood Chart
+      doc.setFontSize(16);
+      doc.setTextColor(0, 0, 0); // Black color
+      doc.text("Mood Progress Chart", margin, yOffset);
+      yOffset += 10;
+
+      const canvas = document.getElementById("moodChart");
+      const chartImage = await html2canvas(canvas).then(canvas => canvas.toDataURL("image/png"));
+      doc.addImage(chartImage, "PNG", margin, yOffset, pageWidth - 2 * margin, 60);
+      yOffset += 70;
+
+      // Assessment Scores
+      const moodData = JSON.parse(localStorage.getItem("moodData")) || [];
+      const scores = moodData.map(entry => entry.score);
+      const latestScore = scores.length > 0 ? scores[scores.length - 1] : "--";
+      const averageScore = scores.length > 0 ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2) : "--";
+      const highestScore = scores.length > 0 ? Math.max(...scores) : "--";
+      const lowestScore = scores.length > 0 ? Math.min(...scores) : "--";
+
+      doc.setFontSize(16);
+      doc.setTextColor(0, 0, 0); // Black color
+      doc.text("Assessment Scores", margin, yOffset);
+      yOffset += 10;
+
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0); // Black color
+      doc.text(`Latest Score: ${latestScore}`, margin, yOffset);
+      yOffset += 8;
+      doc.text(`Average Score: ${averageScore}`, margin, yOffset);
+      yOffset += 8;
+      doc.text(`Highest Score: ${highestScore}`, margin, yOffset);
+      yOffset += 8;
+      doc.text(`Lowest Score: ${lowestScore}`, margin, yOffset);
+      yOffset += 10;
+
+      // Mood Insights
+      doc.setFontSize(16);
+      doc.setTextColor(0, 0, 0); // Black color
+      doc.text("Mood Insights", margin, yOffset);
+      yOffset += 10;
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0); // Black color
+      let insight = "Keep tracking your mood to gain more insights.";
+      if (averageScore >= 4) {
+        insight = "Your mood is consistently positive! Keep up the great habits.";
+      } else if (averageScore >= 2.5) {
+        insight = "Your mood is stable. Consider activities that boost your happiness.";
+      } else if (averageScore > 0) {
+        insight = "Your mood has been low. Try journaling or talking to a trusted friend.";
+      }
+      doc.text(insight, margin, yOffset, { maxWidth: pageWidth - 2 * margin });
+      yOffset += 20;
+
+      // Saved Thoughts
+      doc.setFontSize(16);
+      doc.setTextColor(0, 0, 0); // Black color
+      doc.text("Saved Thoughts", margin, yOffset);
+      yOffset += 10;
+
+      const thoughtList = [];
+      await rtdb.ref("thoughts").once("value", (snapshot) => {
+        snapshot.forEach((dateSnap) => {
+          const date = dateSnap.key;
+          dateSnap.forEach((thoughtSnap) => {
+            thoughtList.push({ date, text: thoughtSnap.val().text, timestamp: thoughtSnap.val().timestamp });
+          });
+        });
+      });
+
+      // Sort thoughts by date (descending) for PDF
+      thoughtList.sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateB - dateA || b.timestamp - a.timestamp; // Sort by date, then timestamp
+      });
+
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0); // Black color
+      if (thoughtList.length === 0) {
+        doc.text("No thoughts saved yet.", margin, yOffset);
+      } else {
+        thoughtList.forEach((thought) => {
+          if (yOffset > doc.internal.pageSize.getHeight() - 20) {
+            doc.addPage();
+            yOffset = 10;
+          }
+          doc.text(`${thought.date}: ${thought.text}`, margin, yOffset, { maxWidth: pageWidth - 2 * margin });
+          yOffset += 10;
+        });
+      }
+
+      // Save the PDF
+      doc.save("MoodyBuddy_Report.pdf");
+    }
+  </script>
+</body>
+
+</html>

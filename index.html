@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MoodyBuddy - Your Mental Wellness Companion</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <link href="https://unpkg.com/aos@next/dist/aos.css" rel="stylesheet">
+  <script>
+    AOS.init();
+  </script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    .typing::after {
+      content: '|';
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      50%,
+      100% {
+        opacity: 1;
+      }
+
+      25%,
+      75% {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+
+<body class="relative bg-gradient-to-r from-pink-100 via-purple-100 to-blue-100 text-gray-800">
+  <!-- nav bar -->
+  <nav class="bg-pink-200 p-4 rounded-b-3xl shadow-md z-50 relative">
+    <div class="flex justify-between items-center">
+      <!-- Logo -->
+      <div class="text-2xl font-bold">
+        <span class="text-pink-600">Moody</span><span class="text-green-500">Buddy</span>
+      </div>
+
+      <!-- Hamburger Icon (Mobile) -->
+      <button id="menuToggle" class="md:hidden text-pink-600 focus:outline-none">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+
+      <!-- Desktop Menu -->
+      <div class="hidden md:flex space-x-6 items-center">
+        <a href="index.html" class="hover:underline">Home</a>
+        <a href="about.html" class="hover:underline">About</a>
+        <a href="Chatbot.html" class="hover:underline">AI Chat</a>
+        <a href="assessment.html" class="hover:underline">Mood Assessment</a>
+        <a href="MentalAsses.html" class="hover:underline">Mental Health Assessment</a>
+        <a href="content.html" class="hover:underline">Content</a>
+        <a href="dashboard.html" class="hover:underline">Dashboard</a>
+        <a href="resources.html" class="hover:underline">Resources</a>
+
+        <!-- Profile Dropdown -->
+        <div class="relative group">
+          <button class="bg-white text-pink-600 px-4 py-2 rounded-full shadow hover:bg-pink-100 focus:outline-none">
+            Profile
+          </button>
+          <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg p-2 hidden group-hover:block z-50">
+            <p id="userEmail" class="text-sm text-gray-700 mb-2 hidden"></p>
+            <button id="loginBtn"
+              class="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-100 rounded">Login</button>
+            <button id="logoutBtn"
+              class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100 rounded hidden">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Sidebar -->
+    <div id="mobileMenu"
+      class="fixed inset-y-0 left-0 w-64 bg-pink-100 p-6 transform -translate-x-full transition-transform duration-300 ease-in-out z-50 md:hidden">
+      <button id="closeMenu" class="text-right w-full text-pink-600 mb-4">
+        ✖ Close
+      </button>
+      <nav class="flex flex-col space-y-4">
+        <a href="index.html" class="hover:underline">Home</a>
+        <a href="about.html" class="hover:underline">About</a>
+        <a href="Chatbot.html" class="hover:underline">AI Chat</a>
+        <a href="assessment.html" class="hover:underline">Mood Assessment</a>
+        <a href="MentalAsses.html" class="hover:underline">Mental Health Assessment</a>
+        <a href="content.html" class="hover:underline">Content</a>
+        <a href="dashboard.html" class="hover:underline">Dashboard</a>
+        <a href="resources.html" class="hover:underline">Resources</a>
+        <div class="border-t pt-2 mt-2">
+          <p id="userEmailMobile" class="text-sm text-gray-700 mb-2 hidden"></p>
+          <button id="loginBtnMobile"
+            class="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-100 rounded">Login</button>
+          <button id="logoutBtnMobile"
+            class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100 rounded hidden">Logout</button>
+        </div>
+      </nav>
+    </div>
+  </nav>
+
+
+  <!-- Hero Section with Video Background -->
+  <section id="home"
+    class="relative min-h-screen flex flex-col items-center justify-center text-center px-6 rounded-3xl mx-4 mt-6  overflow-hidden">
+
+    <!-- Video Background -->
+    <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover z-0">
+      <source src="homebackground.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+
+    <!-- Overlay for better text readability -->
+    <div class="absolute inset-0 bg-gradient-to-r from-purple-100 via-pink-100 to-blue-100 opacity-60 z-10"></div>
+
+    <!-- Hero Content -->
+    <div class="relative z-20 backdrop-blur-md bg-white/10 p-8 rounded-2xl shadow-lg">
+      <h2 class="text-5xl md:text-6xl font-extrabold mb-4 text-white drop-shadow-[0_5px_5px_rgba(0,0,0,0.7)]">
+        Welcome to <span class="text-pink-300">Moody</span><span class="text-green-300">Buddy</span>
+      </h2>
+      <p class="typing text-xl max-w-xl mx-auto mb-6 text-white drop-shadow-[0_3px_3px_rgba(0,0,0,0.7)]">
+        Your personal companion for mental wellness & growth
+      </p>
+      <div class="space-x-4">
+        <a href="assessment.html"
+          class="bg-gradient-to-r from-pink-400 to-pink-600 text-white px-6 py-3 rounded-full shadow-lg hover:scale-105 transform transition">Take
+          Assessment</a>
+        <a href="content.html"
+          class="bg-gradient-to-r from-green-300 to-green-500 text-black px-6 py-3 rounded-full shadow-lg hover:scale-105 transform transition">Explore
+          Content</a>
+      </div>
+    </div>
+
+
+  </section>
+  <section class="py-20 px-6 bg-gradient-to-r from-white via-purple-50 to-pink-50 rounded-3xl mx-4 md:mx-20 mt-10">
+    <h2 class="text-3xl font-bold text-indigo-600 mb-4 flex justify-center">🌟 Join the 30 Days Mood Challenge!</h2>
+    <p class="text-gray-700 text-lg mb-6">
+      Take a step towards better mental wellness! For the next 30 days, track your mood daily and write a small journal
+      entry.
+      Stay consistent, reflect on your feelings, and see how your mood evolves over the month.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div class="p-4 bg-indigo-50 rounded-xl">
+        <h3 class="text-xl font-semibold text-indigo-700 mb-2">📅 Daily Mood Check</h3>
+        <p class="text-gray-600">Rate your mood every day to stay aware of your emotional patterns.</p>
+      </div>
+      <div class="p-4 bg-indigo-50 rounded-xl">
+        <h3 class="text-xl font-semibold text-indigo-700 mb-2">📝 Journal Your Thoughts</h3>
+        <p class="text-gray-600">Write a few lines about your day to reflect and release your feelings.</p>
+      </div>
+      <div class="p-4 bg-indigo-50 rounded-xl">
+        <h3 class="text-xl font-semibold text-indigo-700 mb-2">🏆 Build Your Streak</h3>
+        <p class="text-gray-600">Stay consistent for 30 days and unlock a special reward at the end!</p>
+      </div>
+    </div>
+    <div class="flex justify-center mt-6">
+      <a href="assessment.html"
+        class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-full transition duration-300 inline-flex items-center justify-center">
+        Start Your Challenge
+      </a>
+    </div>
+
+
+
+  </section>
+
+
+
+  <!-- About Section -->
+  <section id="about"
+    class="py-20 px-6 bg-gradient-to-r from-white via-purple-50 to-pink-50 rounded-3xl mx-4 md:mx-20 mt-10">
+    <h3 class="text-4xl font-bold text-center mb-10">What We Do</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div
+        class="bg-gradient-to-r from-pink-200 to-pink-300 p-6 rounded-xl shadow-md hover:scale-105 transform transition">
+        <h4 class="text-2xl font-bold mb-2">Mood Tracking</h4>
+        <p>Daily check-ins to track and reflect on your mood patterns over time.</p>
+      </div>
+      <div
+        class="bg-gradient-to-r from-green-200 to-green-300 p-6 rounded-xl shadow-md hover:scale-105 transform transition">
+        <h4 class="text-2xl font-bold mb-2">Tailored Assessments</h4>
+        <p>Personalized mental health quizzes to help you understand your state better.</p>
+      </div>
+      <div
+        class="bg-gradient-to-r from-blue-200 to-blue-300 p-6 rounded-xl shadow-md hover:scale-105 transform transition">
+        <h4 class="text-2xl font-bold mb-2">Uplifting Content</h4>
+        <p>Motivational quotes, videos, and tips to inspire and uplift you daily.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Assessments Section -->
+  <section id="assessments"
+    class="py-20 px-6 text-center bg-gradient-to-r from-purple-50 via-pink-50 to-blue-50 rounded-3xl mx-4 md:mx-20 mt-10">
+    <h3 class="text-4xl font-bold mb-10">Take Your First Step</h3>
+    <p class="max-w-2xl mx-auto mb-6">Start your journey towards better mental wellness with our scientifically designed
+      assessments. They are quick, easy, and insightful!</p>
+    <a href="assessment.html"
+      class="bg-gradient-to-r from-pink-400 to-pink-600 text-white px-8 py-4 rounded-full shadow-lg hover:scale-105 transform transition">Start
+      Now</a>
+  </section>
+
+  <!-- Content Section -->
+  <section id="content"
+    class="py-20 px-6 bg-gradient-to-r from-white via-purple-50 to-pink-50 rounded-3xl mx-4 md:mx-20 mt-10">
+    <h3 class="text-4xl font-bold text-center mb-10">Feel Good Resources</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div
+        class="bg-gradient-to-r from-purple-200 to-purple-300 p-6 rounded-xl shadow-md hover:scale-105 transform transition">
+        <h4 class="text-2xl font-bold mb-2">Daily Quotes & Videos</h4>
+        <p>Boost your mood with handpicked positive affirmations and calming visuals.</p>
+      </div>
+      <div
+        class="bg-gradient-to-r from-yellow-200 to-yellow-300 p-6 rounded-xl shadow-md hover:scale-105 transform transition">
+        <h4 class="text-2xl font-bold mb-2">Personal Growth Tips</h4>
+        <p>Simple strategies and advice to help you handle stress, anxiety, and daily challenges.</p>
+      </div>
+    </div>
+    <div class="text-center mt-10">
+      <a href="dashboard.html"
+        class="bg-gradient-to-r from-green-300 to-green-500 text-black px-8 py-4 rounded-full shadow-lg hover:scale-105 transform transition">Go
+        to Dashboard</a>
+    </div>
+  </section>
+  <!-- Features Section -->
+  <section id="features"
+    class="py-20 px-6 bg-gradient-to-r from-purple-50 via-pink-50 to-blue-50 rounded-3xl mx-4 md:mx-20 mt-10">
+    <h3 class="text-4xl font-bold text-center mb-10">Exclusive Features</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div
+        class="bg-gradient-to-r from-pink-200 to-pink-300 p-6 rounded-xl shadow-md hover:scale-105 transform transition">
+        <h4 class="text-2xl font-bold mb-2">Mood Journal 📓</h4>
+        <p>Write your thoughts daily and reflect on your emotional journey over time.</p>
+      </div>
+      <div
+        class="bg-gradient-to-r from-green-200 to-green-300 p-6 rounded-xl shadow-md hover:scale-105 transform transition">
+        <h4 class="text-2xl font-bold mb-2">Mood Progress 📈</h4>
+        <p>Visualize your mood trends with interactive charts and track your growth.</p>
+      </div>
+      <div
+        class="bg-gradient-to-r from-blue-200 to-blue-300 p-6 rounded-xl shadow-md hover:scale-105 transform transition">
+        <h4 class="text-2xl font-bold mb-2">Export Reports 📝</h4>
+        <p>Download detailed reports of your mood and assessments for your record or sharing.</p>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- Testimonials Section -->
+  <section id="testimonials"
+    class="py-20 px-6 bg-gradient-to-r from-purple-50 via-pink-50 to-blue-50 rounded-3xl mx-4 md:mx-20 mt-10">
+    <h3 class="text-4xl font-bold text-center mb-10">What People Are Saying About Us 💖</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div
+        class="bg-gradient-to-r from-pink-200 to-pink-300 p-6 rounded-xl shadow-md hover:scale-105 transform transition">
+        <img src="user1.png" alt="User 1" class="w-20 h-20 rounded-full mx-auto mb-4">
+        <h4 class="text-xl font-bold mb-2">Priya S.</h4>
+        <p>"MoodyBuddy helped me track my moods and discover patterns I didn’t even know about. Love the daily quotes
+          too!"</p>
+      </div>
+      <div
+        class="bg-gradient-to-r from-green-200 to-green-300 p-6 rounded-xl shadow-md hover:scale-105 transform transition">
+        <img src="user2.png" alt="User 2" class="w-20 h-20 rounded-full mx-auto mb-4">
+        <h4 class="text-xl font-bold mb-2">Rahul K.</h4>
+        <p>"The assessments gave me clarity and helped me take the right steps for my mental health. Highly recommend!"
+        </p>
+      </div>
+      <div
+        class="bg-gradient-to-r from-blue-200 to-blue-300 p-6 rounded-xl shadow-md hover:scale-105 transform transition">
+        <img src="user3.png" alt="User 3" class="w-20 h-20 rounded-full mx-auto mb-4">
+        <h4 class="text-xl font-bold mb-2">Aisha M.</h4>
+        <p>"Every time I open MoodyBuddy, I feel a little lighter. It's my go-to for motivation and self-care tips."</p>
+      </div>
+    </div>
+  </section>
+  <!-- Contact Section -->
+  <section id="contact"
+    class="py-20 px-6 text-center bg-gradient-to-r from-pink-100 via-purple-100 to-blue-100 rounded-3xl mx-4 md:mx-20 mt-10">
+    <h3 class="text-3xl font-bold mb-4">Stay Connected</h3>
+    <p class="mb-6">Have questions or feedback? We’d love to hear from you.</p>
+    <a href="mailto:hellomoodybuddy@gmail.com" class="text-pink-500 underline text-lg">hellomoodybuddy@gmail.com</a>
+    <p> &copy; All rights are reserved 2025</p>
+    <div class="mt-6 flex justify-center space-x-6">
+      <a href="#" class="hover:underline">Instagram</a>
+      <a href="#" class="hover:underline">LinkedIn</a>
+    </div>
+  </section>
+
+  <div class="max-w-xl mx-auto my-6">
+    <button id="toggleDisclaimerBtn"
+      class="bg-[#A8E6CF] text-[#2E2E2E] font-semibold px-4 py-2 rounded-2xl shadow hover:bg-[#98d6bf] transition duration-300">
+      Show Disclaimer
+    </button>
+
+    <div id="disclaimerBox"
+      class="mt-4 bg-[#fefefe] text-[#2E2E2E] border-l-4 border-[#FF8B94] p-4 rounded-xl shadow hidden">
+      <h2 class="text-lg font-bold mb-2">⚠️ Disclaimer</h2>
+      <p class="text-sm">
+        MoodyBuddy is designed for general well-being and informational purposes only. This platform is
+        <strong>not a substitute for professional medical advice, diagnosis, or treatment</strong>.
+        If you are experiencing a mental health crisis or any emergency, please contact a licensed healthcare provider
+        or emergency services immediately.
+        Use MoodyBuddy for light mood tracking and motivational content only.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const toggleBtn = document.getElementById('toggleDisclaimerBtn');
+    const disclaimerBox = document.getElementById('disclaimerBox');
+
+    toggleBtn.addEventListener('click', () => {
+      disclaimerBox.classList.toggle('hidden');
+      toggleBtn.textContent = disclaimerBox.classList.contains('hidden')
+        ? 'Show Disclaimer'
+        : 'Hide Disclaimer';
+    });
+  </script>
+
+
+
+
+  <!-- Emoji Changer -->
+  <script>
+    const emojis = ['😀', '😞', '😴', '😠', '😍', '🧘', '🤯', '😎'];
+    let current = 0;
+    setInterval(() => {
+      document.title = `MoodyBuddy ${emojis[current]}`;
+      current = (current + 1) % emojis.length;
+    }, 2000);
+  </script>
+  <script>
+    const menuToggle = document.getElementById('menuToggle');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const closeMenu = document.getElementById('closeMenu');
+
+    menuToggle.addEventListener('click', () => {
+      mobileMenu.classList.remove('-translate-x-full');
+    });
+
+    closeMenu.addEventListener('click', () => {
+      mobileMenu.classList.add('-translate-x-full');
+    });
+  </script>
+  <!-- Firebase Login Check & Profile -->
+  <script type="module">
+    // Import Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWUt0uIHtt9Yg32Q4DTGG5A8V8Kg_5Nh4",
+      authDomain: "mindmate-3be89.firebaseapp.com",
+      projectId: "mindmate-3be89",
+      storageBucket: "mindmate-3be89.appspot.com",
+      messagingSenderId: "728689802243",
+      appId: "1:728689802243:web:6b72843ca23117b120e236",
+      measurementId: "G-QWN4PTX6Y8"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Profile & Login Check
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        // Show user's email in profile when logged in
+        document.getElementById('profileEmail').textContent = user.email;
+        document.getElementById('logoutBtn').style.display = 'block';
+      } else {
+        // Redirect to login page if not logged in
+        window.location.href = "login.html"; // This is the change, ensure to change the URL accordingly
+      }
+    });
+
+
+    // Logout function
+    window.logout = function () {
+      signOut(auth).then(() => {
+
+        window.location.href = "login.html";
+      });
+    };
+
+    // Protect Links (force login)
+    protectedLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        if (!auth.currentUser) {
+          e.preventDefault();
+          alert('Please login first!');
+          window.location.href = "login.html";
+        }
+      });
+    });
+
+
+  </script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWUt0uIHtt9Yg32Q4DTGG5A8V8Kg_5Nh4",
+      authDomain: "mindmate-3be89.firebaseapp.com",
+      projectId: "mindmate-3be89",
+      storageBucket: "mindmate-3be89.appspot.com",
+      messagingSenderId: "728689802243",
+      appId: "1:728689802243:web:6b72843ca23117b120e236",
+      measurementId: "G-QWN4PTX6Y8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const userEmail = document.getElementById('userEmail');
+
+    loginBtn.addEventListener('click', () => {
+      const provider = new GoogleAuthProvider();
+      signInWithPopup(auth, provider);
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      signOut(auth);
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        userEmail.textContent = user.email;
+        userEmail.classList.remove('hidden');
+        loginBtn.classList.add('hidden');
+        logoutBtn.classList.remove('hidden');
+      } else {
+        userEmail.classList.add('hidden');
+        loginBtn.classList.remove('hidden');
+        logoutBtn.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MoodyBuddy - Mood Content</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <style>
+    .overlay {
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
+    }
+  </style>
+  <script src="contentLoader.js"></script>
+
+</head>
+<body class="overflow-x-hidden bg-gradient-to-b from-purple-900 via-blue-900 to-black">
+  <nav class="bg-pink-200 p-4 rounded-b-3xl shadow-md z-50 relative">
+    <div class="flex justify-between items-center">
+      <!-- Logo -->
+      <div class="text-2xl font-bold">
+        <span class="text-pink-600">Moody</span><span class="text-green-500">Buddy</span>
+      </div>
+  
+      <!-- Hamburger Icon (Mobile) -->
+      <button id="menuToggle" class="md:hidden text-pink-600 focus:outline-none">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+  
+      <!-- Desktop Menu -->
+      <div class="hidden md:flex space-x-6 items-center">
+        <a href="index.html" class="hover:underline">Home</a>
+        <a href="about.html" class="hover:underline">About</a>
+        <a href="assessment.html" class="hover:underline">Mood Assessment</a>
+        <a href="MentalAsses.html" class="hover:underline">Mental Health Assessment</a>
+        <a href="content.html" class="hover:underline">Content</a>
+        <a href="dashboard.html" class="hover:underline">Dashboard</a>
+        <a href="resources.html" class="hover:underline">Resources</a>
+  
+        <!-- Profile Dropdown -->
+        <div class="relative group">
+          <button class="bg-white text-pink-600 px-4 py-2 rounded-full shadow hover:bg-pink-100 focus:outline-none">
+            Profile
+          </button>
+          <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg p-2 hidden group-hover:block z-50">
+            <p id="userEmail" class="text-sm text-gray-700 mb-2 hidden"></p>
+            <button id="loginBtn" class="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-100 rounded">Login</button>
+            <button id="logoutBtn" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100 rounded hidden">Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Mobile Sidebar -->
+    <div id="mobileMenu" class="fixed inset-y-0 left-0 w-64 bg-pink-100 p-6 transform -translate-x-full transition-transform duration-300 ease-in-out z-50 md:hidden">
+      <button id="closeMenu" class="text-right w-full text-pink-600 mb-4">
+        ✖ Close
+      </button>
+      <nav class="flex flex-col space-y-4">
+        <a href="index.html" class="hover:underline">Home</a>
+        <a href="about.html" class="hover:underline">About</a>
+        <a href="assessment.html" class="hover:underline">Mood Assessment</a>
+        <a href="MentalAsses.html" class="hover:underline">Mental Health Assessment</a>
+        <a href="content.html" class="hover:underline">Content</a>
+        <a href="dashboard.html" class="hover:underline">Dashboard</a>
+        <a href="resources.html" class="hover:underline">Resources</a>
+        <div class="border-t pt-2 mt-2">
+          <p id="userEmailMobile" class="text-sm text-gray-700 mb-2 hidden"></p>
+          <button id="loginBtnMobile" class="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-100 rounded">Login</button>
+          <button id="logoutBtnMobile" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100 rounded hidden">Logout</button>
+        </div>
+      </nav>
+    </div>
+  </nav>
+  <!-- 😄 Happy -->
+  <section class="relative h-screen w-full" id="happy">
+    <video autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover z-0">
+      <source src="assets/videos/happy.mp4" type="video/mp4" />
+    </video>
+    <div class="overlay absolute inset-0 z-10 flex flex-col justify-center items-center text-center text-white px-4">
+      <h1 class="text-6xl font-bold mb-4 animate-bounce">😄 Happy</h1>
+      <p class="text-2xl mb-6">Happiness doubles when shared!</p>
+      <div class="flex gap-4">
+        <button class="px-6 py-2 bg-yellow-400 hover:bg-yellow-500 transition rounded-full shadow-xl">🎵 Play Music</button>
+        <button class="px-6 py-2 bg-pink-400 hover:bg-pink-500 transition rounded-full shadow-xl">📺 Watch Video</button>
+        <button class="px-6 py-2 bg-green-400 hover:bg-green-500 transition rounded-full shadow-xl">📖 Read Tips</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 😢 Sad -->
+  <section class="relative h-screen w-full" id="sad">
+    <video autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover z-0">
+      <source src="assets/videos/sad.mp4" type="video/mp4" />
+    </video>
+    <div class="overlay absolute inset-0 z-10 flex flex-col justify-center items-center text-center text-white px-4">
+      <h1 class="text-6xl font-bold mb-4 animate-pulse">😢 Sad</h1>
+      <p class="text-2xl mb-6">It's okay to feel low. You’re not alone.</p>
+      <div class="flex gap-4">
+        <button class="px-6 py-2 bg-blue-400 hover:bg-blue-500 transition rounded-full shadow-xl">🎵 Soothing Music</button>
+        <button class="px-6 py-2 bg-indigo-400 hover:bg-indigo-500 transition rounded-full shadow-xl">📺 Watch Uplift</button>
+        <button class="px-6 py-2 bg-red-400 hover:bg-red-500 transition rounded-full shadow-xl">📖 Healing Tips</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 😡 Angry -->
+  <section class="relative h-screen w-full" id="angry">
+    <video autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover z-0">
+      <source src="assets/videos/angry.mp4" type="video/mp4" />
+    </video>
+    <div class="overlay absolute inset-0 z-10 flex flex-col justify-center items-center text-center text-white px-4">
+      <h1 class="text-6xl font-bold mb-4 animate-wiggle">😡 Angry</h1>
+      <p class="text-2xl mb-6">Let the storm pass before you act.</p>
+      <div class="flex gap-4">
+        <button class="px-6 py-2 bg-red-600 hover:bg-red-700 transition rounded-full shadow-xl">🎵 Calm Beats</button>
+        <button class="px-6 py-2 bg-yellow-500 hover:bg-yellow-600 transition rounded-full shadow-xl">📺 Meditation</button>
+        <button class="px-6 py-2 bg-orange-400 hover:bg-orange-500 transition rounded-full shadow-xl">📖 Cool Down Tips</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 😰 Stressed -->
+  <section class="relative h-screen w-full" id="stressed">
+    <video autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover z-0">
+      <source src="assets/videos/stressed.mp4" type="video/mp4" />
+    </video>
+    <div class="overlay absolute inset-0 z-10 flex flex-col justify-center items-center text-center text-white px-4">
+      <h1 class="text-6xl font-bold mb-4 animate-pulse">😰 Stressed</h1>
+      <p class="text-2xl mb-6">Breathe. You've got this.</p>
+      <div class="flex gap-4">
+        <button class="px-6 py-2 bg-cyan-500 hover:bg-cyan-600 transition rounded-full shadow-xl">🎵 Breathe Music</button>
+        <button class="px-6 py-2 bg-teal-400 hover:bg-teal-500 transition rounded-full shadow-xl">📺 1-min Calm</button>
+        <button class="px-6 py-2 bg-blue-500 hover:bg-blue-600 transition rounded-full shadow-xl">📖 Stress Busters</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🤩 Excited -->
+  <section class="relative h-screen w-full" id="excited">
+    <video autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover z-0">
+      <source src="assets/videos/excited.mp4" type="video/mp4" />
+    </video>
+    <div class="overlay absolute inset-0 z-10 flex flex-col justify-center items-center text-center text-white px-4">
+      <h1 class="text-6xl font-bold mb-4 animate-bounce">🤩 Excited</h1>
+      <p class="text-2xl mb-6">Ride the wave of excitement!</p>
+      <div class="flex gap-4">
+        <button class="px-6 py-2 bg-fuchsia-500 hover:bg-fuchsia-600 transition rounded-full shadow-xl">🎵 Party Time</button>
+        <button class="px-6 py-2 bg-lime-400 hover:bg-lime-500 transition rounded-full shadow-xl">📺 Adventure Clip</button>
+        <button class="px-6 py-2 bg-orange-500 hover:bg-orange-600 transition rounded-full shadow-xl">📖 Energy Tips</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 😔 Lonely -->
+  <section class="relative h-screen w-full" id="lonely">
+    <video autoplay loop muted playsinline class="absolute top-0 left-0 w-full h-full object-cover z-0">
+      <source src="assets/videos/lonely.mp4" type="video/mp4" />
+    </video>
+    <div class="overlay absolute inset-0 z-10 flex flex-col justify-center items-center text-center text-white px-4">
+      <h1 class="text-6xl font-bold mb-4 animate-pulse">😔 Lonely</h1>
+      <p class="text-2xl mb-6">You’re seen. You matter.</p>
+      <div class="flex gap-4">
+        <button class="px-6 py-2 bg-purple-400 hover:bg-purple-500 transition rounded-full shadow-xl">🎵 Acoustic Mood</button>
+        <button class="px-6 py-2 bg-rose-500 hover:bg-rose-600 transition rounded-full shadow-xl">📺 Friendly Chat</button>
+        <button class="px-6 py-2 bg-emerald-400 hover:bg-emerald-500 transition rounded-full shadow-xl">📖 Connect Ideas</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script>AOS.init();</script>
+</body>
+</html>

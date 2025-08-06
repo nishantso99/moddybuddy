@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mood Assessment</title>
+  <!-- Firebase Services -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-[#A8E6CF] flex items-center justify-center min-h-screen">
+  <div class="w-full max-w-xl p-6 bg-white rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold text-center text-[#FF8B94] mb-6 shadow-sm">
+      Let's Understand Your Mood
+    </h1>
+
+    <div id="questionContainer"></div>
+    <p id="errorMsg" class="text-red-500 text-center mt-3 hidden">Please select an option to continue.</p>
+
+    <div class="mt-4 flex justify-between">
+      <button id="backBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg hidden">← Back</button>
+    </div>
+  </div>
+
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWUt0uIHtt9Yg32Q4DTGG5A8V8Kg_5Nh4",
+      authDomain: "mindmate-3be89.firebaseapp.com",
+      projectId: "mindmate-3be89",
+      storageBucket: "mindmate-3be89.appspot.com",
+      messagingSenderId: "728689802243",
+      appId: "1:728689802243:web:6b72843ca23117b120e236",
+      measurementId: "G-QWN4PTX6Y8"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    const questions = [
+      { text: "How do you feel right now?", options: ["Happy", "Sad", "Stressed", "Angry", "Neutral"] },
+      { text: "How’s your energy today?", options: ["High", "Medium", "Low", "Exhausted", "Hyper"] },
+      { text: "How well did you sleep last night?", options: ["Very well", "Okay", "Poorly", "Barely", "Not at all"] },
+      { text: "Are you feeling motivated?", options: ["Yes", "No", "Somewhat", "Trying", "Not sure"] },
+      { text: "Are you feeling anxious?", options: ["Not at all", "A little", "Moderately", "Very", "Extremely"] },
+      { text: "Do you feel appreciated?", options: ["Yes", "No", "Sometimes", "Rarely", "I don't know"] },
+      { text: "Are you able to focus on tasks?", options: ["Yes", "No", "Sometimes", "Too distracted", "Super focused"] },
+      { text: "Are you enjoying your day so far?", options: ["Yes", "No", "A little", "It's okay", "Not really"] },
+      { text: "Have you laughed today?", options: ["Yes", "No", "Not yet", "A lot", "Don't remember"] },
+      { text: "How would you rate your overall mental state?", options: ["Great", "Good", "Okay", "Not good", "Terrible"] }
+    ];
+
+    const emojiMap = {
+      "Happy": "😊", "Sad": "😢", "Stressed": "😰", "Angry": "😠", "Neutral": "😐",
+      "High": "⚡", "Medium": "🙂", "Low": "😴", "Exhausted": "😫", "Hyper": "🤪",
+      "Very well": "😴", "Okay": "😌", "Poorly": "😕", "Barely": "🥱", "Not at all": "😵",
+      "Yes": "👍", "No": "👎", "Somewhat": "🤔", "Trying": "💪", "Not sure": "❓",
+      "Not at all": "😌", "A little": "🙂", "Moderately": "😟", "Very": "😨", "Extremely": "😖",
+      "Sometimes": "🤷", "Rarely": "😕", "I don't know": "❓",
+      "Too distracted": "😵", "Super focused": "🎯",
+      "A little": "🙂", "It's okay": "😐", "Not really": "🙁",
+      "Not yet": "🕒", "A lot": "😂", "Don't remember": "🤷",
+      "Great": "🌟", "Good": "👍", "Okay": "👌", "Not good": "🙁", "Terrible": "😔"
+    };
+
+    let responses = [];
+    let currentIndex = 0;
+    const container = document.getElementById("questionContainer");
+    const backBtn = document.getElementById("backBtn");
+    const errorMsg = document.getElementById("errorMsg");
+
+    // Auth Check
+    auth.onAuthStateChanged(user => {
+      if (!user) window.location.href = 'login.html';
+      else renderQuestion(currentIndex);
+    });
+
+    function renderQuestion(index) {
+      const q = questions[index];
+      let html = `<p class="text-lg font-medium text-center mb-4">${q.text}</p><div class="flex flex-wrap justify-center gap-3">`;
+
+      q.options.forEach((opt) => {
+        const emoji = emojiMap[opt] || "❔";
+        html += `
+          <label class="cursor-pointer text-center">
+            <input 
+              type="radio" 
+              name="currentQuestion" 
+              value="${opt}" 
+              class="hidden peer"
+            >
+            <div class="px-4 py-2 rounded-md border peer-checked:bg-blue-500 peer-checked:text-white bg-gray-100 hover:bg-blue-100 transition w-32">
+              <div class="text-2xl mb-1">${emoji}</div>
+              ${opt}
+            </div>
+          </label>
+        `;
+      });
+
+      container.innerHTML = html + "</div>";
+      backBtn.style.display = index > 0 ? "inline-block" : "none";
+      errorMsg.classList.add("hidden");
+    }
+
+    // Auto-advance on selection
+    container.addEventListener("change", async (e) => {
+      if (e.target.name === "currentQuestion") {
+        responses[currentIndex] = e.target.value;
+        currentIndex++;
+
+        if (currentIndex < questions.length) {
+          renderQuestion(currentIndex);
+        } else {
+          const user = auth.currentUser;
+          const moodScore = calculateMoodScore(responses);
+          
+          try {
+            await db.collection("users").doc(user.uid)
+              .collection("assessments")
+              .add({
+                responses,
+                moodScore,
+                timestamp: new Date(),
+                moodCategory: responses[0]
+              });
+
+            showCompletionScreen(moodScore);
+          } catch (error) {
+            console.error("Save failed:", error);
+            alert("Error saving assessment. Please try again.");
+          }
+        }
+      }
+    });
+
+    backBtn.addEventListener("click", () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderQuestion(currentIndex);
+      }
+    });
+
+    function calculateMoodScore(responses) {
+      const moodMap = {
+        "Happy": 5, "Sad": 2, "Stressed": 2, "Angry": 1, "Neutral": 3,
+        "High": 5, "Medium": 3, "Low": 2, "Exhausted": 1, "Hyper": 4,
+        "Very well": 5, "Okay": 3, "Poorly": 2, "Barely": 1, "Not at all": 1,
+        "Yes": 5, "No": 1, "Somewhat": 3, "Trying": 3, "Not sure": 2,
+        "Not at all": 5, "A little": 4, "Moderately": 3, "Very": 2, "Extremely": 1,
+        "Sometimes": 3, "Rarely": 2, "I don't know": 2,
+        "Too distracted": 1, "Super focused": 5,
+        "A little": 3, "It's okay": 3, "Not really": 2,
+        "Not yet": 3, "A lot": 5, "Don't remember": 2,
+        "Great": 5, "Good": 4, "Okay": 3, "Not good": 2, "Terrible": 1
+      };
+
+      return Math.round(responses.reduce((sum, res) => sum + (moodMap[res] || 3), 0) / responses.length);
+    }
+
+    function showCompletionScreen(score) {
+      container.innerHTML = `
+        <div class="text-center">
+          <h2 class="text-xl font-semibold text-green-600 mb-4">Assessment Complete!</h2>
+          <p class="text-lg">Your Mood Score: <span class="font-bold">${score}/5</span></p>
+          <div class="mt-6">
+            <a href="dashboard.html" class="bg-[#FF8B94] hover:bg-pink-600 text-white px-6 py-3 rounded-xl">
+              View Dashboard
+            </a>
+          </div>
+        </div>
+      `;
+      backBtn.classList.add("hidden");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-white">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MoodyBUddy AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+  <style>
+    /* Animations */
+    .fade-in { animation: fadeIn 0.5s ease forwards; }
+    .slide-in { animation: slideIn 0.4s ease forwards; }
+    .pop { animation: popIn 0.3s ease forwards; }
+    .pulse { animation: pulseAnim 1.5s infinite; }
+  
+    @keyframes fadeIn {
+      from {opacity: 0;}
+      to {opacity: 1;}
+    }
+    @keyframes slideIn {
+      from {transform: translateY(20px); opacity: 0;}
+      to {transform: translateY(0); opacity: 1;}
+    }
+    @keyframes popIn {
+      from {transform: scale(0.8); opacity: 0;}
+      to {transform: scale(1); opacity: 1;}
+    }
+    @keyframes pulseAnim {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+  </style>
+</head>
+<body class="h-screen flex overflow-hidden bg-gradient-to-r from-purple-100 to-pink-100 font-sans">
+  <body class="h-screen flex overflow-hidden bg-gradient-to-r from-purple-100 to-pink-100 font-sans">
+    <body class="h-screen flex overflow-hidden bg-gradient-to-r from-purple-200 via-pink-200 to-yellow-100 font-sans">
+
+      <!-- Sidebar -->
+      <div id="sidebar" class="w-72 bg-gradient-to-b from-purple-300 to-pink-200 border-r p-6 flex flex-col space-y-6 rounded-tr-3xl rounded-br-3xl shadow-2xl">
+        <div class="flex justify-between items-center">
+          <button class="lg:hidden text-purple-700" onclick="toggleSidebar(false)">❌</button>
+        </div>
+        <button onclick="handleNewChat()" class="bg-purple-600 hover:bg-purple-700 transition text-white py-2 rounded-xl shadow-md text-lg">➕ Start New Chat</button>
+        <div id="chatHistory" class="overflow-y-auto text-sm text-gray-700 space-y-3 h-full mt-4">
+          <p class="text-gray-500 italic">No chats yet 🤗</p>
+        </div>
+      </div>
+    
+      <!-- Main Chat -->
+      <div class="flex-1 flex flex-col h-screen">
+    
+        <!-- Topbar -->
+        <div class="bg-gradient-to-r from-gray200 to-gray-400 flex items-center justify-between p-4 rounded-bl-3xl shadow-lg">
+          <div class="lg:hidden">
+            <button onclick="toggleSidebar(true)" class="text-white text-2xl">☰</button>
+          </div>
+          <div class="flex items-center space-x-3">
+            <img src="LOGO_2_.jpg" class="h-12 rounded-full border-4 border-white shadow-md" alt="AI Logo"/>
+            <div>
+              <h3 class="text-2xl font-bold text-white">MoodyBuddy 🤖</h3>
+              <p class="text-sm text-green-200">🟢 Online</p>
+            </div>
+          </div>
+          <div class="relative">
+            <img src="moodybuddy_logo.jpg" class="h-10 w-10 rounded-full border-2 border-white cursor-pointer shadow-md" onclick="toggleDropdown()"/>
+            <div id="dropdown" class="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded hidden">
+              <button onclick="toggleSettings()" class="block w-full text-left px-4 py-2 hover:bg-gray-100">⚙️ Settings</button>
+              
+            </div>
+          </div>
+        </div>
+    
+        <!-- Messages -->
+        <div id="messages" class="flex-1 p-6 overflow-y-auto space-y-4 bg-white bg-opacity-70 rounded-xl m-4 shadow-inner text-sm">
+          <!-- Example Bubble -->
+          <!--
+          <div class="bg-purple-100 p-3 rounded-2xl shadow text-purple-800 max-w-md">Hello there! 👋</div>
+          -->
+        </div>
+    
+        <!-- Input -->
+        <div class="flex items-center gap-2 p-6 border-t bg-gradient-to-r from-purple-100 to-pink-100 rounded-t-3xl shadow-lg">
+          <input id="userInput" type="text" placeholder="Type your thoughts here... ✨" class="flex-1 p-3 rounded-full border focus:outline-none focus:ring-2 focus:ring-purple-400 transition bg-white bg-opacity-80 border-purple-300 text-purple-700 placeholder-purple-400 shadow-inner" onkeydown="handleKey(event)"/>
+          <div id="micStatus" class="text-purple-700 hidden"><i class="fas fa-microphone mr-1"></i>🎙️ Listening...</div>
+          <button id="sendBtn" onclick="handleInputAction()" class="p-3 bg-purple-600 hover:bg-purple-700 transition text-white rounded-full shadow-lg text-xl">
+            🚀
+          </button>
+        </div>
+      </div>
+    
+      <!-- Settings Modal -->
+      <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-50">
+        <div class="bg-gradient-to-b from-purple-100 to-pink-100 p-6 rounded-3xl w-96 relative space-y-4 shadow-2xl">
+          <button onclick="toggleSettings()" class="absolute top-2 right-2 text-gray-600 text-2xl">❌</button>
+          <h2 class="text-2xl font-semibold text-purple-700">⚙️ Settings</h2>
+          <div class="flex space-x-2">
+            <button onclick="switchTab('General')" class="tab bg-purple-600 text-white px-4 py-2 rounded-full shadow active">🛠️ General</button>
+            <button onclick="switchTab('Speech')" class="tab bg-purple-200 text-purple-800 px-4 py-2 rounded-full shadow">🗣️ Speech</button>
+          </div>
+          <div id="General" class="tab-content space-y-3">
+            <label class="block text-purple-700">
+              👤 My Profile Name:
+              <input id="profileName" type="text" value="User" class="w-full border p-2 mt-1 rounded-full bg-white bg-opacity-70 shadow-inner"/>
+            </label>
+            <label class="block text-purple-700">
+              🎯 Model Accuracy:
+              <select id="modelAccuracy" class="w-full border p-2 mt-1 rounded-full bg-white bg-opacity-70 shadow-inner">
+                <option>Low</option>
+                <option selected>Medium</option>
+                <option>High</option>
+              </select>
+            </label>
+            <label class="block text-purple-700">
+              🎨 Model Behavior:
+              <select id="modelBehavior" class="w-full border p-2 mt-1 rounded-full bg-white bg-opacity-70 shadow-inner">
+                <option selected>Accurate</option>
+                <option>Creative</option>
+              </select>
+            </label>
+          </div>
+          <div id="Speech" class="tab-content hidden space-y-2 text-purple-700">
+            <label>👨 <input type="radio" name="voice" value="male"> Male</label>
+            <label>👩 <input type="radio" name="voice" value="female" checked> Female</label>
+          </div>
+        </div>
+      </div>
+     <script>
+    let messages = [{ text: "Hi there! How can I help you?", sender: "bot" }];
+    let isRecording = false, recognition;
+    const msgBox = document.getElementById("messages");
+    const inputEl = document.getElementById("userInput");
+    const micStatus = document.getElementById("micStatus");
+    let selectedVoice = "female";
+
+    function renderMessages() {
+      msgBox.innerHTML = messages.map(m =>
+        `<div class="text-${m.sender === 'user' ? 'right' : 'left'}">
+          <div class="inline-block px-4 py-2 rounded-xl ${m.sender === 'user' ? 'bg-purple-500 text-white' : 'bg-gray-200'}">${m.text}</div>
+        </div>`
+      ).join('');
+      msgBox.scrollTop = msgBox.scrollHeight;
+    }
+
+    function handleNewChat() {
+      messages = [{ text: "Hi there! How can I help you?", sender: "bot" }];
+      renderMessages();
+    }
+
+    function handleInputAction() {
+      if (inputEl.value.trim()) {
+        sendMessage();
+      } else {
+        isRecording ? stopRecording() : startRecording();
+      }
+    }
+
+    async function sendMessage() {
+      const text = inputEl.value.trim();
+      if (!text) return;
+      messages.push({ text, sender: "user" });
+      inputEl.value = "";
+      messages.push({ text: "Thinking...", sender: "bot", temp: true });
+      renderMessages();
+      try {
+        const res = await fetch("https://d22e-34-124-203-217.ngrok-free.app/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: text }),
+        });
+        const data = await res.json();
+        messages = messages.filter(m => !m.temp);
+        messages.push({ text: data.response || "No response", sender: "bot" });
+        speakText(data.response);
+      } catch (e) {
+        messages = messages.filter(m => !m.temp);
+        messages.push({ text: "Oops, error occurred.", sender: "bot" });
+      }
+      renderMessages();
+    }
+
+    function startRecording() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return alert("Speech recognition not supported.");
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.onresult = e => {
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const transcript = e.results[i][0].transcript;
+          if (e.results[i].isFinal) {
+            inputEl.value += transcript;
+            stopRecording();
+          }
+        }
+      };
+      recognition.onend = stopRecording;
+      recognition.start();
+      isRecording = true;
+      micStatus.classList.remove("hidden");
+      document.getElementById("sendBtn").innerHTML = '<i class="fas fa-stop"></i>';
+
+    }
+
+    function stopRecording() {
+      recognition?.stop();
+      isRecording = false;
+      micStatus.classList.add("hidden");
+      document.getElementById("sendBtn").innerHTML = '<i class="fas fa-stop"></i>';
+
+    }
+
+    function speakText(text) {
+      const utter = new SpeechSynthesisUtterance(text);
+      const voices = speechSynthesis.getVoices();
+      utter.voice = voices.find(v => v.name.toLowerCase().includes(selectedVoice)) || null;
+      speechSynthesis.speak(utter);
+    }
+
+    function handleKey(e) {
+      if (e.key === "Enter") handleInputAction();
+    }
+
+    function toggleSidebar(show) {
+      document.getElementById("sidebar").classList.toggle("hidden", !show);
+    }
+
+    function toggleDropdown() {
+      const dd = document.getElementById("dropdown");
+      dd.classList.toggle("hidden");
+    }
+
+    function toggleSettings() {
+      document.getElementById("settingsModal").classList.toggle("hidden");
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll(".tab").forEach(btn => {
+        btn.classList.remove("bg-purple-500", "text-white", "active");
+        btn.classList.add("bg-gray-200");
+      });
+      document.querySelectorAll(".tab-content").forEach(div => div.classList.add("hidden"));
+      event.target.classList.add("bg-purple-500", "text-white", "active");
+      event.target.classList.remove("bg-gray-200");
+      document.getElementById(tab).classList.remove("hidden");
+    }
+
+    // Listen to speech voice settings
+    document.querySelectorAll('input[name="voice"]').forEach(radio => {
+      radio.addEventListener("change", () => selectedVoice = radio.value);
+    });
+
+    // Load initial messages and voices
+    renderMessages();
+    window.speechSynthesis.onvoiceschanged = () => {}; // Trigger voices to load
+  </script>
+</body>
+</html>

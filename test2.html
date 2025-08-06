@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoodyBuddy Content Loader</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.3/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .loading {
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+            text-align: center;
+            margin: 50px;
+        }
+
+        .content-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        .content-item {
+            background-color: #f0f9f4;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-[#A8E6CF]">
+
+    <div id="loading" class="loading active">Loading...</div>
+    
+    <div class="content-container" id="content-container">
+        <!-- Content will be loaded here -->
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/firebase@9.0.0/firebase-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/firebase@9.0.0/firebase-storage.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/firebase@9.0.0/firebase-database.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+        const db = firebase.database();
+
+        // Fetching content from Firebase (Storage or Realtime Database)
+        async function loadContent() {
+            try {
+                // Simulating loading data from Firebase Realtime Database
+                const contentRef = db.ref('content'); // Path to your content in Firebase
+                const snapshot = await contentRef.once('value');
+                const contentData = snapshot.val();
+
+                // Populate content
+                const contentContainer = document.getElementById('content-container');
+                const loadingIndicator = document.getElementById('loading');
+                loadingIndicator.classList.remove('active');
+
+                for (let key in contentData) {
+                    const content = contentData[key];
+                    const contentItem = document.createElement('div');
+                    contentItem.classList.add('content-item');
+
+                    if (content.type === 'video') {
+                        contentItem.innerHTML = `<h3>${content.title}</h3><iframe width="100%" height="200" src="https://www.youtube.com/embed/${content.id}" frameborder="0" allowfullscreen></iframe>`;
+                    } else if (content.type === 'music') {
+                        contentItem.innerHTML = `<h3>${content.title}</h3><audio controls><source src="${content.url}" type="audio/mp3"></audio>`;
+                    } else if (content.type === 'tip') {
+                        contentItem.innerHTML = `<h3>Tip: ${content.title}</h3><p>${content.description}</p>`;
+                    }
+
+                    contentContainer.appendChild(contentItem);
+                }
+            } catch (error) {
+                console.error("Error loading content: ", error);
+                const contentContainer = document.getElementById('content-container');
+                contentContainer.innerHTML = '<p>Error loading content. Please try again later.</p>';
+            }
+        }
+
+        // Initialize loading content
+        loadContent();
+    </script>
+</body>
+</html>

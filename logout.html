@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Logging out...</title>
+  <script type="module">
+    import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWUt0uIHtt9Yg32Q4DTGG5A8V8Kg_5Nh4",
+      authDomain: "mindmate-3be89.firebaseapp.com",
+      projectId: "mindmate-3be89",
+      storageBucket: "mindmate-3be89.firebasestorage.app",
+      messagingSenderId: "728689802243",
+      appId: "1:728689802243:web:6b72843ca23117b120e236",
+      measurementId: "G-QWN4PTX6Y8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    signOut(auth)
+      .then(() => {
+        localStorage.setItem("logoutSuccess", "true");
+        window.location.href = "login.html";
+      })
+      .catch((error) => {
+        alert("Logout failed: " + error.message);
+        window.location.href = "login.html";
+      });
+  </script>
+</head>
+<body>
+  <p>Logging you out...</p>
+</body>
+</html>

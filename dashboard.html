@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MoodyBuddy Dashboard</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+</head>
+
+<body class="bg-pink-100 min-h-screen p-6 overflow-x-hidden">
+  <nav class="flex justify-between items-center bg-pink-200 p-4 rounded-b-3xl shadow-md z-50 relative">
+    <div class="text-2xl font-bold">
+      <span class="text-pink-600">Moody</span><span class="text-green-500">Buddy</span>
+    </div>
+    
+    <div class="space-x-6 flex items-center">
+      <a href="index.html" class="hover:underline">Home</a>
+      <a href="about.html" class="hover:underline">About</a>
+      <a href="assessment.html" class="hover:underline">Mood Assessment</a>
+      <a href="MentalAsses.html" class="hover:underline">Mental Health Assessment</a>
+      <a href="content.html" class="hover:underline">Content</a>
+      <a href="dashboard.html" class="hover:underline">Dashboard</a>
+      <a href="resources.html" class="hover:underline">Resources</a>
+  
+      <!-- Profile Dropdown -->
+      <div class="relative group z-50">
+        <button class="bg-white text-pink-600 px-4 py-2 rounded-full shadow hover:bg-pink-100 focus:outline-none">
+          Profile
+        </button>
+        <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg p-2 hidden group-hover:block z-50">
+          <p id="userEmail" class="text-sm text-gray-700 mb-2 hidden"></p>
+          <button id="loginBtn" class="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-100 rounded">Login</button>
+          <button id="logoutBtn" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100 rounded hidden">Logout</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+  <div class="max-w-7xl mx-auto bg-white rounded-3xl shadow-2xl p-10 space-y-12 animate__animated animate__fadeIn">
+    
+    <!-- Header -->
+    <h1 class="text-4xl font-bold text-center text-[#FF8B94] animate__animated animate__pulse mb-10">
+      🎯 Welcome to Your MoodyBuddy Dashboard 🎯
+    </h1>
+
+    <!-- Assessment + Thoughts Layout -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+      
+      <!-- Latest Assessment -->
+      <section class="bg-[#f7f7f7] rounded-2xl p-8 shadow-md animate__animated animate__fadeInLeft">
+        <h2 class="text-2xl font-bold mb-4">📝 Latest Mood Assessment</h2>
+        <div id="latestAssessment" class="space-y-2"></div>
+      </section>
+
+      <!-- Thoughts Section -->
+      <section class="bg-[#f7f7f7] rounded-2xl p-8 shadow-md animate__animated animate__fadeInRight">
+        <h2 class="text-2xl font-bold mb-4">💬 Journal Your Thoughts</h2>
+        <form id="thoughtForm" class="flex flex-col gap-4 mb-6">
+          <textarea id="thoughtInput" class="w-full border rounded-xl p-4" placeholder="Write something you're feeling..."></textarea>
+          <button type="submit" class="bg-[#FF8B94] hover:bg-pink-500 text-white px-6 py-2 rounded-xl self-end animate__animated animate__bounceIn">
+            ✍️ Submit
+          </button>
+        </form>
+        <div id="thoughtsList" class="space-y-4"></div>
+      </section>
+
+    </div>
+
+    <!-- Analytics Section -->
+    <section class="bg-[#f7f7f7] rounded-2xl p-8 shadow-md animate__animated animate__fadeInUp">
+      <h2 class="text-2xl font-bold mb-8 text-center">📊 Mood Analytics Overview</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div>
+          <h3 class="text-lg font-semibold mb-2">📈 Mood Score (7 days)</h3>
+          <canvas id="moodLineChart" class="w-full h-64"></canvas>
+        </div>
+        <div>
+          <h3 class="text-lg font-semibold mb-2">📊 Mood Frequency</h3>
+          <canvas id="moodBarChart" class="w-full h-64"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Download PDF -->
+    <div class="text-center mt-12 animate__animated animate__fadeInUp">
+      <button id="downloadPdf" class="bg-green-500 hover:bg-green-600 text-white text-lg px-10 py-4 rounded-full">
+        📥 Download Full Report
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWUt0uIHtt9Yg32Q4DTGG5A8V8Kg_5Nh4",
+      authDomain: "mindmate-3be89.firebaseapp.com",
+      projectId: "mindmate-3be89",
+      storageBucket: "mindmate-3be89.appspot.com",
+      messagingSenderId: "728689802243",
+      appId: "1:728689802243:web:6b72843ca23117b120e236",
+      measurementId: "G-QWN4PTX6Y8",
+      databaseURL: "https://mindmate-3be89-default-rtdb.firebaseio.com/"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const rtdb = firebase.database();
+
+    let userId;
+    let lineChart, barChart;
+
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        window.location.href = 'login.html';
+      } else {
+        userId = user.uid;
+        fetchLatestAssessment();
+        fetchThoughts();
+        fetchAnalytics();
+      }
+    });
+
+    // Latest Assessment
+    async function fetchLatestAssessment() {
+      const snapshot = await db.collection('users').doc(userId).collection('assessments')
+        .orderBy('timestamp', 'desc').limit(1).get();
+
+      if (!snapshot.empty) {
+        const data = snapshot.docs[0].data();
+        document.getElementById('latestAssessment').innerHTML = `
+          <p><strong>😄 Mood Category:</strong> ${data.moodCategory}</p>
+          <p><strong>🎯 Mood Score:</strong> ${data.moodScore}/5</p>
+          <p><strong>💡 Suggestion:</strong> ${getSuggestions(data.moodCategory)}</p>
+        `;
+      } else {
+        document.getElementById('latestAssessment').innerHTML = '<p>No assessment yet!</p>';
+      }
+    }
+
+    function getSuggestions(mood) {
+      const suggestions = {
+        "Happy": "Keep enjoying! 🎉",
+        "Sad": "Talk to someone close. 🫂",
+        "Stressed": "Relax and meditate. 🧘‍♂️",
+        "Angry": "Take a deep breath. 🌬️",
+        "Neutral": "Make today special! 🌟"
+      };
+      return suggestions[mood] || "Stay mindful! 🙏";
+    }
+
+    // Thoughts
+    document.getElementById('thoughtForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const thought = document.getElementById('thoughtInput').value.trim();
+      if (thought) {
+        const dateKey = new Date().toISOString().split('T')[0];
+        await rtdb.ref(`thoughts/${userId}/${dateKey}`).push({
+          text: thought,
+          timestamp: new Date().toISOString()
+        });
+        document.getElementById('thoughtInput').value = '';
+        fetchThoughts();
+      }
+    });
+
+    async function fetchThoughts() {
+      const thoughtsList = document.getElementById('thoughtsList');
+      thoughtsList.innerHTML = '';
+
+      const snapshot = await rtdb.ref(`thoughts/${userId}`).once('value');
+      const data = snapshot.val();
+
+      if (data) {
+        const dates = Object.keys(data).sort().reverse();
+        dates.forEach(date => {
+          const thoughts = Object.values(data[date]);
+          const thoughtItems = thoughts.map(t => `<li class="ml-4 list-disc">${t.text}</li>`).join('');
+          thoughtsList.innerHTML += `
+            <div class="p-4 bg-gray-50 rounded-lg">
+              <h3 class="font-semibold mb-2">📅 ${date}</h3>
+              <ul>${thoughtItems}</ul>
+            </div>
+          `;
+        });
+      } else {
+        thoughtsList.innerHTML = '<p>No thoughts yet!</p>';
+      }
+    }
+
+    // Analytics
+    async function fetchAnalytics() {
+      const snapshot = await db.collection('users').doc(userId).collection('assessments')
+        .orderBy('timestamp', 'desc').limit(7).get();
+
+      const labels = [];
+      const scores = [];
+      const moodCounts = {};
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const date = data.timestamp.toDate().toISOString().split('T')[0];
+        labels.unshift(date);
+        scores.unshift(data.moodScore);
+
+        if (moodCounts[data.moodCategory]) {
+          moodCounts[data.moodCategory]++;
+        } else {
+          moodCounts[data.moodCategory] = 1;
+        }
+      });
+
+      // Line Chart (Mood Scores)
+      const ctxLine = document.getElementById('moodLineChart').getContext('2d');
+      lineChart = new Chart(ctxLine, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Mood Score',
+            data: scores,
+            borderColor: '#FF8B94',
+            backgroundColor: '#FF8B9440',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          scales: {
+            y: { beginAtZero: true, max: 5 }
+          }
+        }
+      });
+
+      // Bar Chart (Mood Categories)
+      const ctxBar = document.getElementById('moodBarChart').getContext('2d');
+      barChart = new Chart(ctxBar, {
+        type: 'bar',
+        data: {
+          labels: Object.keys(moodCounts),
+          datasets: [{
+            label: 'Times Occurred',
+            data: Object.values(moodCounts),
+            backgroundColor: ['#FFD700', '#87CEEB', '#FF6347', '#32CD32', '#BA55D3']
+          }]
+        },
+        options: {
+          indexAxis: 'y'
+        }
+      });
+    }
+
+    // Download PDF
+    document.getElementById('downloadPdf').addEventListener('click', async () => {
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+
+      pdf.setFontSize(20);
+      pdf.text("MoodMate Assessment Report 📋", 20, 20);
+
+      let y = 40;
+
+      // Latest Assessment
+      const snapshot = await db.collection('users').doc(userId).collection('assessments')
+        .orderBy('timestamp', 'desc').limit(7).get();
+
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const date = data.timestamp.toDate().toLocaleDateString();
+        pdf.setFontSize(12);
+        pdf.text(`📅 ${date} | Mood: ${data.moodCategory} | Score: ${data.moodScore}/5`, 20, y);
+        y += 10;
+      });
+
+      // Add charts
+      const lineChartImg = lineChart.toBase64Image();
+      pdf.addPage();
+      pdf.text("📈 Mood Score Trends", 20, 20);
+      pdf.addImage(lineChartImg, 'PNG', 15, 30, 180, 100);
+
+      const barChartImg = barChart.toBase64Image();
+      pdf.addPage();
+      pdf.text("📊 Mood Category Frequency", 20, 20);
+      pdf.addImage(barChartImg, 'PNG', 15, 30, 180, 100);
+
+      pdf.save('MoodMate_Report.pdf');
+    });
+
+  </script>
+</body>
+</html>

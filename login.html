@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login | Mindmate</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-mint-100 flex items-center justify-center h-screen">
+
+  
+  <div class="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-md">
+    <h2 id="form-title" class="text-2xl font-bold text-center text-gray-800 mb-6">Login to MoodyBuddy</h2>
+
+    <div class="mb-4">
+      <label class="block text-gray-800 font-medium mb-2">Email</label>
+      <input type="email" id="email" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-mint-500" placeholder="Enter your email" />
+    </div>
+
+    <div class="mb-2">
+      <label class="block text-gray-700 font-medium mb-2">Password</label>
+      <input type="password" id="password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-mint-500" placeholder="Enter your password" />
+    </div>
+
+    <div class="text-right mb-4">
+      <button onclick="resetPassword()" class="text-sm text-[#FF8B94] hover:underline font-medium">Forgot Password?</button>
+    </div>
+
+    <div id="error-message" class="text-red-500 text-sm mb-4 hidden"></div>
+    <div id="success-message" class="text-green-600 text-sm mb-4 hidden"></div>
+
+    <button onclick="handleAuth()" id="auth-btn" class="w-full bg-[#A8E6CF] hover:bg-[#90d8bd] text-gray-800 font-bold py-2 rounded-lg transition duration-300">
+      Login
+    </button>
+
+    <p class="mt-4 text-center text-sm text-gray-600">
+      <span id="toggle-text">Don't have an account?</span>
+      <button id="toggle-btn" onclick="toggleForm()" class="text-[#FF8B94] font-semibold underline ml-1">Sign up</button>
+    </p>
+  </div>
+
+  <div id="logout-toast" class="fixed top-5 right-5 bg-[#A8E6CF] text-gray-800 px-6 py-3 rounded-lg shadow-lg text-sm font-medium hidden z-50 transition-all duration-300">
+    ✅ Logged out successfully. Please login to continue.
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      sendPasswordResetEmail
+    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+
+    const toast = document.getElementById("logout-toast");
+    if (localStorage.getItem("logoutSuccess")) {
+      toast.classList.remove("hidden");
+      toast.classList.add("opacity-100");
+
+      setTimeout(() => {
+        toast.classList.add("hidden");
+        localStorage.removeItem("logoutSuccess");
+      }, 3000);
+    }
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWUt0uIHtt9Yg32Q4DTGG5A8V8Kg_5Nh4",
+      authDomain: "mindmate-3be89.firebaseapp.com",
+      projectId: "mindmate-3be89",
+      storageBucket: "mindmate-3be89.firebasestorage.app",
+      messagingSenderId: "728689802243",
+      appId: "1:728689802243:web:6b72843ca23117b120e236",
+      measurementId: "G-QWN4PTX6Y8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    let isLogin = true;
+
+    window.toggleForm = function () {
+      isLogin = !isLogin;
+      document.getElementById("form-title").textContent = isLogin ? "Login to Mindmate" : "Sign up for Mindmate";
+      document.getElementById("auth-btn").textContent = isLogin ? "Login" : "Sign Up";
+      document.getElementById("toggle-text").textContent = isLogin ? "Don't have an account?" : "Already have an account?";
+      document.getElementById("toggle-btn").textContent = isLogin ? "Sign up" : "Login";
+      document.getElementById("error-message").classList.add("hidden");
+      document.getElementById("success-message").classList.add("hidden");
+    };
+
+    window.handleAuth = function () {
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const errorMessage = document.getElementById("error-message");
+      const successMessage = document.getElementById("success-message");
+
+      errorMessage.classList.add("hidden");
+      successMessage.classList.add("hidden");
+
+      if (isLogin) {
+        signInWithEmailAndPassword(auth, email, password)
+          .then(() => {
+            const redirectPage = localStorage.getItem("redirectAfterLogin") || "dashboard.html";
+            localStorage.removeItem("redirectAfterLogin");
+            window.location.href = redirectPage;
+          })
+          .catch(err => {
+            errorMessage.textContent = err.message;
+            errorMessage.classList.remove("hidden");
+          });
+      } else {
+        createUserWithEmailAndPassword(auth, email, password)
+          .then(() => window.location.href = "dashboard.html")
+          .catch(err => {
+            errorMessage.textContent = err.message;
+            errorMessage.classList.remove("hidden");
+          });
+      }
+    };
+
+    window.resetPassword = function () {
+      const email = document.getElementById("email").value;
+      const errorMessage = document.getElementById("error-message");
+      const successMessage = document.getElementById("success-message");
+
+      errorMessage.classList.add("hidden");
+      successMessage.classList.add("hidden");
+
+      if (!email) {
+        errorMessage.textContent = "Please enter your email to reset password.";
+        errorMessage.classList.remove("hidden");
+        return;
+      }
+
+      sendPasswordResetEmail(auth, email)
+        .then(() => {
+          successMessage.textContent = "Password reset link sent! Check your email.";
+          successMessage.classList.remove("hidden");
+        })
+        .catch((error) => {
+          errorMessage.textContent = error.message;
+          errorMessage.classList.remove("hidden");
+        });
+    };
+  </script>
+</body>
+</html>

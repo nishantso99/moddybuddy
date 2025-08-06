@@ -1,0 +1,64 @@
+<!-- This file represents the dashboard page where user's assessment history (journal) is shown -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard - Journal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-[#A8E6CF] text-[#2E2E2E] font-sans p-6">
+  <h1 class="text-3xl font-bold mb-6">Welcome to Your Dashboard</h1>
+  <div id="journalContainer" class="space-y-4">
+    <!-- Assessment journal entries will be injected here -->
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = '/login.html';
+      } else {
+        const journalContainer = document.getElementById('journalContainer');
+
+        db.collection('assessments')
+          .where('userId', '==', user.uid)
+          .orderBy('timestamp', 'desc')
+          .get()
+          .then(snapshot => {
+            if (snapshot.empty) {
+              journalContainer.innerHTML = '<p>No assessments found yet.</p>';
+            } else {
+              snapshot.forEach(doc => {
+                const data = doc.data();
+                const date = new Date(data.timestamp.seconds * 1000);
+                const entry = document.createElement('div');
+                entry.className = 'bg-white rounded-lg shadow p-4';
+                entry.innerHTML = `
+                  <h2 class="text-xl font-semibold">${date.toDateString()}</h2>
+                  <p class="text-gray-700 mt-2">Mood: <strong>${data.mood}</strong></p>
+                  <p class="mt-1">Reflection: ${data.reflection}</p>
+                `;
+                journalContainer.appendChild(entry);
+              });
+            }
+          });
+      }
+    });
+  </script>
+</body>
+</html>
